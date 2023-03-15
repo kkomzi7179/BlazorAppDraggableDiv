@@ -1,0 +1,80 @@
+﻿<div @onclick="InvokeClick" class=" @(Class)" width="@(WH)" height="@(WH)"
+	style="touch-action:none;@(Style);cursor:@(draging ? "grabing": "move");@(draged ? $"right:{Right}px!important" : "");@(draged ? $"bottom:{Bottom}px!important" : "");"
+	draggable="true"
+	@ondragstart="@((e) => OnDragStart(e))"
+	@ondragend="@((e) => OnDragEnd(e))"
+	@ontouchstart="@((e) => OnTouchStart(e))"
+	@ontouchmove="@((e) => OnTouchMove(e))"
+	@ontouchend="@((e) => OnTouchEnd(e))"
+>
+	<svg xmlns="http://www.w3.org/2000/svg" width="@(WH)" height="@(WH)" fill="currentColor" class="bi bi-cloud-plus-fill" viewBox="0 0 16 16">
+		<path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2zm.5 4v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 1 0z" />
+	</svg>
+</div>
+@code {
+	[Parameter]
+	public string WH { get; set; } = "50px";
+	[Parameter]
+	public string Class { get; set; } = string.Empty;
+	[Parameter]
+	public string Style { get; set; } = string.Empty;
+	[Parameter]
+	public EventCallback OnClick { get; set; }
+	private async Task InvokeClick()
+	{
+		await OnClick.InvokeAsync();
+	}
+
+	bool draging = false;
+	double Right = 0;
+	double Bottom = 0;
+	bool draged = false;
+	private double startX, startY, offsetX, offsetY;
+
+	private void OnDragStart(DragEventArgs args)
+	{
+		//Console.WriteLine($"Start : {args.ScreenX}, {args.ScreenY}");
+		draged = true;
+		draging = true;
+		startX = args.ScreenX;
+		startY = args.ScreenY;
+	}
+
+	private void OnDragEnd(DragEventArgs args)
+	{
+		//Console.WriteLine($"End : {args.ScreenX}, {args.ScreenY}");
+		draging = false;
+		offsetX = args.ScreenX - startX;
+		offsetY = args.ScreenY - startY;
+		Right -= offsetX;
+		Bottom -= offsetY;
+	}
+	private void OnTouchStart(TouchEventArgs args)
+	{
+		//Console.WriteLine($"TouchStart : {args.Touches[0].ScreenX}, {args.Touches[0].ScreenY}");
+		draged = true;
+		draging = true;
+		startX = args.Touches[0].ScreenX;
+		startY = args.Touches[0].ScreenY;
+	}
+
+	private void OnTouchMove(TouchEventArgs args)
+	{
+		//Console.WriteLine($"TouchMove : {args.ChangedTouches[0].ScreenX}, {args.ChangedTouches[0].ScreenY}");
+		offsetX = args.ChangedTouches[0].ScreenX - startX;
+		offsetY = args.ChangedTouches[0].ScreenY - startY;
+		Right -= offsetX;
+		Bottom -= offsetY;
+		startX = args.ChangedTouches[0].ScreenX;
+		startY = args.ChangedTouches[0].ScreenY;
+	}
+	private void OnTouchEnd(TouchEventArgs args)
+	{
+		//Console.WriteLine($"TouchEnd : {args.ChangedTouches[0].ScreenX}, {args.ChangedTouches[0].ScreenY}");
+		draging = false;
+		offsetX = args.ChangedTouches[0].ScreenX - startX;
+		offsetY = args.ChangedTouches[0].ScreenY - startY;
+		Right -= offsetX;
+		Bottom -= offsetY;
+	}
+}
